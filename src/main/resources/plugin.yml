@@ -4,3 +4,9 @@ main: xyz.realplussmp.bounty.Bounty
 api-version: '1.21'
 authors: [ mrrpmeowfurry ]
 description: Bounty Plugin
+depend: [ Vault ]
+commands:
+  bounty:
+    description: just a bounty hunter :)
+  bountyadmin:
+    description: admin commands for bounty

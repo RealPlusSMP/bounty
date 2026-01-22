@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id "com.github.johnrengelman.shadow" version "8.1.1"
     id("xyz.jpenilla.run-paper") version "2.3.1"
 }
 
@@ -8,14 +9,19 @@ version = '1.0-SNAPSHOT'
 
 repositories {
     mavenCentral()
+    maven { url 'https://jitpack.io' }
     maven {
         name = "papermc-repo"
         url = "https://repo.papermc.io/repository/maven-public/"
     }
+    maven { url 'https://repo.codemc.io/repository/creatorfromhell/' }
 }
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT")
+    compileOnly "net.milkbowl.vault:VaultUnlockedAPI:2.16"
+    implementation 'com.zaxxer:HikariCP:5.1.0'
+    implementation 'mysql:mysql-connector-java:8.0.33'
 }
 
 tasks {
@@ -23,7 +29,9 @@ tasks {
         // Configure the Minecraft version for our task.
         // This is the only required configuration besides applying the plugin.
         // Your plugin's jar (or shadowJar if present) will be used automatically.
-        minecraftVersion("1.21")
+        dependsOn shadowJar
+        pluginJars.from(tasks.shadowJar)
+        minecraftVersion("1.21.4")
     }
 }
 

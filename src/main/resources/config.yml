@@ -1,0 +1,10 @@
+database:
+  host: localhost
+  port: 3306
+  name: bounties
+  user: root
+  pass: password
+
+bounty:
+  min: 10
+  max: 100000

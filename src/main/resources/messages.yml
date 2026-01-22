@@ -1,0 +1,15 @@
+bounty-placed: "<green>You placed a bounty of <yellow>$%amount%</yellow> on <aqua>%player%</aqua></green>"
+claimed: "<gold>You claimed <yellow>$%amount%</yellow> bounty!</gold>"
+
+global:
+  bounty-placed: "<green>A bounty of <yellow>$%amount%</yellow> has been put on <aqua>%player%</aqua>."
+  claimed-global: "<gold>%player% <green>has claimed a bounty of <yellow>$%amount%</yellow>."
+
+errors:
+  self-bounty: "<red>You can't place a bounty on yourself!</red>"
+  player-not-found: "<red>Player not found!</red>"
+  not-enough-money: "<red>You don't have enough money!</red>"
+  invalid-cmd: "<red>Invalid command argument!"
+  bounty-too-low: "<red>Minimum bounty is <yellow>%min%</yellow>"
+  bounty-too-high: "<red>Maximum bounty is <yellow>%max%</yellow>"
+  invalid-amount: "<red>Invalid number!"
