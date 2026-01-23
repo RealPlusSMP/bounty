@@ -1,6 +1,7 @@
 package xyz.realplussmp.bounty.gui;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -10,6 +11,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import xyz.realplussmp.bounty.bounty.BountyManager;
+import xyz.realplussmp.bounty.bounty.BountySortType;
 import xyz.realplussmp.bounty.util.MessageUtil;
 
 import java.util.*;
@@ -20,6 +22,7 @@ public class BountyGUI {
     private final FileConfiguration config;
 
     private final Map<UUID, Integer> playerPages = new HashMap<>();
+    private final Map<UUID, BountySortType> playerSort = new HashMap<>();
     private static final int PAGE_SIZE = 45;
 
     public BountyGUI(BountyManager bountyManager, FileConfiguration config) {
@@ -32,25 +35,32 @@ public class BountyGUI {
 
         Inventory inv = Bukkit.createInventory(null, 54, MessageUtil.get("gui.title", Map.of("currentpage", String.valueOf(page + 1))));
 
-        List<Map.Entry<UUID, Double>> entries = new ArrayList<>(bountyManager.getAllBounties().entrySet());
-        entries.sort((a, b) -> Double.compare(b.getValue(), a.getValue()));
+        List<Map.Entry<UUID, Double>> entries;
+        BountySortType sort = playerSort.getOrDefault(player.getUniqueId(), BountySortType.AMOUNT);
+
+        if (sort == BountySortType.RECENT) {
+            entries = bountyManager.getAllBountiesSortedByRecent();
+        } else {
+            entries = new ArrayList<>(bountyManager.getAllBounties().entrySet());
+        }
 
         int start = page * PAGE_SIZE;
         int end = Math.min(start + PAGE_SIZE, entries.size());
 
+        Set<Integer> reserved = getReservedSlots();
         int slot = 0;
+
         for (int i = start; i < end; i++) {
+            while (reserved.contains(slot)) slot++;
+
             Map.Entry<UUID, Double> entry = entries.get(i);
-
             var offline = Bukkit.getOfflinePlayer(entry.getKey());
-            String name = offline.getName();
-            if (name == null) name = "Unknown";
+            String name = offline.getName() != null ? offline.getName() : "Unknown";
 
-            double amount = entry.getValue();
-            inv.setItem(slot++, createBountyItem(name, amount));
+            inv.setItem(slot++, createBountyItem(name, entry.getValue()));
         }
 
-        addStaticItems(inv, page, entries.size());
+        addStaticItems(player, inv, page, entries.size());
         player.openInventory(inv);
     }
 
@@ -58,12 +68,19 @@ public class BountyGUI {
         Set<Integer> set = new HashSet<>();
         set.add(config.getInt("gui.info-item.slot"));
         set.add(config.getInt("gui.search-item.slot"));
+        set.add(config.getInt("gui.sort-item.slot"));
+        set.add(config.getInt("gui.next-page-item.slot"));
+        set.add(config.getInt("gui.back-item.slot"));
         return set;
     }
 
     private ItemStack createBountyItem(String playerName, double amount) {
         ItemStack head = new ItemStack(Material.PLAYER_HEAD);
         ItemMeta meta = head.getItemMeta();
+        if (meta instanceof org.bukkit.inventory.meta.SkullMeta skullMeta) {
+            skullMeta.setOwningPlayer(Bukkit.getOfflinePlayer(playerName));
+            meta = skullMeta;
+        }
 
         meta.displayName(MessageUtil.get("gui.player-head.item-name",
                 Map.of("player", playerName)));
@@ -75,7 +92,14 @@ public class BountyGUI {
     }
 
     public void handleClick(InventoryClickEvent e) {
-        if (!e.getView().title().contains(Component.text("ʙᴏᴜɴᴛɪᴇꜱ"))) return;
+        String opened = PlainTextComponentSerializer.plainText().serialize(e.getView().title());
+
+        String base = config.getString("gui.title");
+        if (base == null) return;
+
+        String basePlain = base.split("%currentpage%")[0];
+
+        if (!opened.startsWith(basePlain)) return;
 
         e.setCancelled(true);
         Player player = (Player) e.getWhoClicked();
@@ -93,8 +117,17 @@ public class BountyGUI {
         }
 
         if (slot == config.getInt("gui.next-page-item.slot")) {
-            playerPages.put(uuid, playerPages.getOrDefault(uuid, 0) + 1);
-            open(player);
+            int current = playerPages.getOrDefault(uuid, 0);
+            int size = playerSort.getOrDefault(uuid, BountySortType.AMOUNT) == BountySortType.RECENT
+                    ? bountyManager.getAllBountiesSortedByRecent().size()
+                    : bountyManager.getAllBounties().size();
+
+            int maxPage = (int) Math.ceil(size / (double) PAGE_SIZE) - 1;
+
+            if (current < maxPage) {
+                playerPages.put(uuid, current + 1);
+                open(player);
+            }
             return;
         }
 
@@ -105,13 +138,27 @@ public class BountyGUI {
                 open(player);
             }
         }
+
+        if (slot == config.getInt("gui.sort-item.slot")) {
+            BountySortType current = playerSort.getOrDefault(uuid, BountySortType.AMOUNT);
+            playerSort.put(uuid, current == BountySortType.AMOUNT ? BountySortType.RECENT : BountySortType.AMOUNT);
+            open(player);
+            return;
+        }
     }
 
-    private void addStaticItems(Inventory inv, int page, int totalEntries) {
+    private void addStaticItems(Player player, Inventory inv, int page, int totalEntries) {
         int maxPage = (int) Math.ceil(totalEntries / (double) PAGE_SIZE) - 1;
 
         // Info item
-        Material infoMat = Material.valueOf(config.getString("gui.info-item.item"));
+        String matName = config.getString("gui.info-item.item");
+        if (matName == null) return;
+        Material infoMat;
+        try {
+            infoMat = Material.valueOf(matName.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return;
+        }
         int infoSlot = config.getInt("gui.info-item.slot");
         ItemStack info = new ItemStack(infoMat);
         ItemMeta infoMeta = info.getItemMeta();
@@ -121,9 +168,16 @@ public class BountyGUI {
         inv.setItem(infoSlot, info);
 
         // Search item
-        Material searchMat = Material.valueOf(config.getString("gui.search-item.item"));
+        String searchMatName = config.getString("gui.search-item.item");
+        if (searchMatName == null) return;
+        Material searchMaterial;
+        try {
+            searchMaterial = Material.valueOf(searchMatName.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return;
+        }
         int searchSlot = config.getInt("gui.search-item.slot");
-        ItemStack search = new ItemStack(searchMat);
+        ItemStack search = new ItemStack(searchMaterial);
         ItemMeta searchMeta = search.getItemMeta();
         searchMeta.displayName(MessageUtil.get("gui.search-item.item-name"));
         searchMeta.lore(MessageUtil.getList("gui.search-item.lore"));
@@ -156,5 +210,16 @@ public class BountyGUI {
             back.setItemMeta(meta);
             inv.setItem(backSlot, back);
         }
+
+        // Sort item
+        Material sortMat = Material.valueOf(config.getString("gui.sort-item.item"));
+        int sortSlot = config.getInt("gui.sort-item.slot");
+        ItemStack sort = new ItemStack(sortMat);
+        ItemMeta sortMeta = sort.getItemMeta();
+        sortMeta.displayName(MessageUtil.get("gui.sort-item.item-name"));
+        BountySortType sortType = playerSort.getOrDefault(player.getUniqueId(), BountySortType.AMOUNT);
+        sortMeta.lore(MessageUtil.getList("gui.sort-item.lore", Map.of("sorting", sortType.getDisplay())));
+        sort.setItemMeta(sortMeta);
+        inv.setItem(sortSlot, sort);
     }
 }

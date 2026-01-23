@@ -7,6 +7,7 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import xyz.realplussmp.bounty.bounty.BountyManager;
 import xyz.realplussmp.bounty.commands.BountyCommand;
+import xyz.realplussmp.bounty.commands.BountyTabCompleter;
 import xyz.realplussmp.bounty.database.MySQL;
 import xyz.realplussmp.bounty.gui.BountyGUI;
 import xyz.realplussmp.bounty.listeners.GUIListener;
@@ -47,6 +48,7 @@ public final class Bounty extends JavaPlugin {
         BountyGUI bountyGUI = new BountyGUI(bountyManager, getMessages());
 
         getCommand("bounty").setExecutor(new BountyCommand(bountyManager, economy, configUtil, bountyGUI));
+        getCommand("bounty").setTabCompleter(new BountyTabCompleter());
 
         getServer().getPluginManager().registerEvents(new KillListener(bountyManager, economy), this);
         getServer().getPluginManager().registerEvents(new GUIListener(bountyGUI), this);

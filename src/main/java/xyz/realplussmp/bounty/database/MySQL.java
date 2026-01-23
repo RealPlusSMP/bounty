@@ -29,7 +29,8 @@ public class MySQL implements Database {
             st.executeUpdate("""
                 CREATE TABLE IF NOT EXISTS bounties (
                     uuid VARCHAR(36) PRIMARY KEY,
-                    amount DOUBLE
+                    amount DOUBLE NOT NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 );
             """);
         } catch (SQLException e) {

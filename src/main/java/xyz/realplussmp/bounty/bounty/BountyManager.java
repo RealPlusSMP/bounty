@@ -3,9 +3,7 @@ package xyz.realplussmp.bounty.bounty;
 import xyz.realplussmp.bounty.database.Database;
 
 import java.sql.*;
-import java.util.Collections;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public class BountyManager {
 
@@ -50,10 +48,11 @@ public class BountyManager {
     }
 
     public Map<UUID, Double> getAllBounties() {
-        Map<UUID, Double> result = new java.util.HashMap<>();
+        Map<UUID, Double> result = new LinkedHashMap<>();
 
         try (Connection con = database.getConnection();
-             PreparedStatement ps = con.prepareStatement("SELECT uuid, amount FROM bounties");
+             PreparedStatement ps = con.prepareStatement(
+                     "SELECT uuid, amount FROM bounties ORDER BY amount DESC");
              ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
@@ -66,6 +65,27 @@ public class BountyManager {
             e.printStackTrace();
         }
 
-        return Collections.unmodifiableMap(result);
+        return result;
+    }
+
+    public List<Map.Entry<UUID, Double>> getAllBountiesSortedByRecent() {
+        List<Map.Entry<UUID, Double>> result = new ArrayList<>();
+
+        try (Connection con = database.getConnection();
+             PreparedStatement ps = con.prepareStatement(
+                     "SELECT uuid, amount FROM bounties ORDER BY created_at DESC");
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                UUID uuid = UUID.fromString(rs.getString("uuid"));
+                double amount = rs.getDouble("amount");
+                result.add(Map.entry(uuid, amount));
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return result;
     }
 }

@@ -46,12 +46,17 @@ public class BountyCommand implements CommandExecutor {
             return true;
         }
 
-        double amount = Double.parseDouble(args[2]);
+        double amount;
 
         try {
             amount = Double.parseDouble(args[2]);
         } catch (NumberFormatException e) {
             player.sendMessage(MessageUtil.get("errors.invalid-amount"));
+            return true;
+        }
+
+        if (amount <= 0) {
+            player.sendMessage(MessageUtil.get("errors.negative-amount"));
             return true;
         }
 

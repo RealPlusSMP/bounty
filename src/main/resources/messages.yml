@@ -25,10 +25,19 @@ gui:
       - ""
       - "<gray>Currently searching for:"
       - "<gray>%whoisthis%"
+  sort-item:
+    item: HOPPER
+    slot: 48
+    item-name: "<#008BFF>ꜱᴏʀᴛ"
+    lore:
+      - "<white>Click to sort"
+      - ""
+      - "<gray>Current sorting:"
+      - "<gray>%sorting%"
   next-page-item:
     item: ARROW
     slot: 53
-    item-name: "<#008BFF>next page"
+    item-name: "<#008BFF>ɴᴇxᴛ ᴘᴀɢᴇ"
     lore:
       - "<white>Click to next page"
       - ""
@@ -36,9 +45,9 @@ gui:
   back-item:
     item: ARROW
     slot: 45
-    item-name: "<#008BFF>Go back"
+    item-name: "<#008BFF>ʙᴀᴄᴋ"
     lore:
-      - "<white>Click to go back"
+      - "<white>Click to go to the previous page"
 
 global:
   bounty-placed: "<green>A bounty of <yellow>$%amount%</yellow> has been put on <aqua>%player%</aqua>."
@@ -52,3 +61,4 @@ errors:
   bounty-too-low: "<red>Minimum bounty is <yellow>%min%</yellow>"
   bounty-too-high: "<red>Maximum bounty is <yellow>%max%</yellow>"
   invalid-amount: "<red>Invalid number!"
+  negative-amount: "<red>Amount cannot be 0 or negative!"
