@@ -1,6 +1,8 @@
 package xyz.realplussmp.bounty.listeners;
 
+import net.kyori.adventure.text.Component;
 import net.milkbowl.vault.economy.Economy;
+import net.milkbowl.vault.economy.EconomyResponse;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -28,11 +30,22 @@ public class KillListener implements Listener {
         if (killer == null) return;
 
         double bounty = bountyManager.getBounty(victim.getUniqueId());
-        if (bounty > 0) {
-            economy.depositPlayer(killer, bounty);
+        if (Double.isNaN(bounty) || bounty <= 0) return;
+
+        if (bounty < 0) {
+            EconomyResponse res = economy.depositPlayer(killer, bounty);
+
+            if (!res.transactionSuccess()) {
+                killer.sendMessage(Component.text("§cFailed to deposit bounty: " + res.errorMessage));
+                return;
+            }
+
+            Bukkit.getLogger().info("Depositing " + bounty + " to " + killer.getName());
+            Bukkit.getLogger().info("Economy: " + economy.getName());
+
             bountyManager.removeBounty(victim.getUniqueId());
-            killer.sendMessage(MessageUtil.get("claimed", Map.of("amount", String.valueOf(bounty))));
-            Bukkit.broadcast(MessageUtil.get("global.claimed-global", Map.of("player", killer.getName(), "amount", String.valueOf(bounty))));
+            killer.sendMessage(MessageUtil.get("claimed", Map.of("amount", String.format("%.2f", bounty))));
+            Bukkit.broadcast(MessageUtil.get("global.claimed-global", Map.of("player", killer.getName(), "amount", String.format("%.2f", bounty))));
         }
     }
 }

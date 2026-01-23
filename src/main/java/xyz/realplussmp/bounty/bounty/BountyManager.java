@@ -3,6 +3,8 @@ package xyz.realplussmp.bounty.bounty;
 import xyz.realplussmp.bounty.database.Database;
 
 import java.sql.*;
+import java.util.Collections;
+import java.util.Map;
 import java.util.UUID;
 
 public class BountyManager {
@@ -45,5 +47,25 @@ public class BountyManager {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    public Map<UUID, Double> getAllBounties() {
+        Map<UUID, Double> result = new java.util.HashMap<>();
+
+        try (Connection con = database.getConnection();
+             PreparedStatement ps = con.prepareStatement("SELECT uuid, amount FROM bounties");
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                UUID uuid = UUID.fromString(rs.getString("uuid"));
+                double amount = rs.getDouble("amount");
+                result.put(uuid, amount);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return Collections.unmodifiableMap(result);
     }
 }

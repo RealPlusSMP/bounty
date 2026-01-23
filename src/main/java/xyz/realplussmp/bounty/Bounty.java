@@ -8,6 +8,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 import xyz.realplussmp.bounty.bounty.BountyManager;
 import xyz.realplussmp.bounty.commands.BountyCommand;
 import xyz.realplussmp.bounty.database.MySQL;
+import xyz.realplussmp.bounty.gui.BountyGUI;
+import xyz.realplussmp.bounty.listeners.GUIListener;
 import xyz.realplussmp.bounty.listeners.KillListener;
 import xyz.realplussmp.bounty.util.ConfigUtil;
 import xyz.realplussmp.bounty.util.MessageUtil;
@@ -42,10 +44,12 @@ public final class Bounty extends JavaPlugin {
 
         bountyManager = new BountyManager(database);
         ConfigUtil configUtil = new ConfigUtil(getConfig());
+        BountyGUI bountyGUI = new BountyGUI(bountyManager, getMessages());
 
-        getCommand("bounty").setExecutor(new BountyCommand(bountyManager, economy, configUtil));
+        getCommand("bounty").setExecutor(new BountyCommand(bountyManager, economy, configUtil, bountyGUI));
 
         getServer().getPluginManager().registerEvents(new KillListener(bountyManager, economy), this);
+        getServer().getPluginManager().registerEvents(new GUIListener(bountyGUI), this);
     }
 
     public void reloadMessages() {
@@ -58,9 +62,13 @@ public final class Bounty extends JavaPlugin {
     }
 
     private boolean setupEconomy() {
-        if (getServer().getPluginManager().getPlugin("Vault") == null) return false;
-        RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
+        if (getServer().getPluginManager().getPlugin("Vault") == null) {
+            return false;
+        }
+        RegisteredServiceProvider<Economy> rsp =
+                getServer().getServicesManager().getRegistration(Economy.class);
         if (rsp == null) return false;
+
         economy = rsp.getProvider();
         return economy != null;
     }

@@ -1,6 +1,45 @@
 bounty-placed: "<green>You placed a bounty of <yellow>$%amount%</yellow> on <aqua>%player%</aqua></green>"
 claimed: "<gold>You claimed <yellow>$%amount%</yellow> bounty!</gold>"
 
+gui:
+  title: "ʙᴏᴜɴᴛɪᴇꜱ (Page %currentpage%)"
+  player-head:
+    item-name: "<#008BFF>%player%"
+    lore:
+      - "<white>Bounty: <gray>$%amount%</gray>"
+  info-item:
+    item: NETHER_STAR
+    slot: 49
+    item-name: "<#008BFF>ʙᴏᴜɴᴛɪᴇꜱ"
+    lore:
+      - "<white>Click to refresh"
+      - ""
+      - "<gray>Set a bounty on someone using this:"
+      - "<gray>/bounty add (player) (amount)"
+  search-item:
+    item: OAK_SIGN
+    slot: 50
+    item-name: "<#008BFF>ꜱᴇᴀʀᴄʜ"
+    lore:
+      - "<white>Click to search"
+      - ""
+      - "<gray>Currently searching for:"
+      - "<gray>%whoisthis%"
+  next-page-item:
+    item: ARROW
+    slot: 53
+    item-name: "<#008BFF>next page"
+    lore:
+      - "<white>Click to next page"
+      - ""
+      - "<gray>Current page: <white>%currentpage%"
+  back-item:
+    item: ARROW
+    slot: 45
+    item-name: "<#008BFF>Go back"
+    lore:
+      - "<white>Click to go back"
+
 global:
   bounty-placed: "<green>A bounty of <yellow>$%amount%</yellow> has been put on <aqua>%player%</aqua>."
   claimed-global: "<gold>%player% <green>has claimed a bounty of <yellow>$%amount%</yellow>."

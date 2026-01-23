@@ -5,6 +5,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.*;
 import org.bukkit.entity.Player;
 import xyz.realplussmp.bounty.bounty.BountyManager;
+import xyz.realplussmp.bounty.gui.BountyGUI;
 import xyz.realplussmp.bounty.util.ConfigUtil;
 import xyz.realplussmp.bounty.util.MessageUtil;
 
@@ -15,18 +16,25 @@ public class BountyCommand implements CommandExecutor {
     private final BountyManager bountyManager;
     private final Economy economy;
     private final ConfigUtil configUtil;
+    private final BountyGUI bountyGUI;
 
-    public BountyCommand(BountyManager bountyManager, Economy economy, ConfigUtil configUtil) {
+    public BountyCommand(BountyManager bountyManager, Economy economy, ConfigUtil configUtil, BountyGUI bountyGUI) {
         this.bountyManager = bountyManager;
         this.economy = economy;
         this.configUtil = configUtil;
+        this.bountyGUI = bountyGUI;
     }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player player)) return true;
 
-        if (args.length != 3 || !args[0].equalsIgnoreCase("put")) {
+        if (args.length == 0) {
+            bountyGUI.open(player);
+            return true;
+        }
+
+        if (args.length != 3 || !args[0].equalsIgnoreCase("add")) {
             player.sendMessage(MessageUtil.get("errors.invalid-cmd"));
             return true;
         }
@@ -51,12 +59,12 @@ public class BountyCommand implements CommandExecutor {
         double max = configUtil.getDouble("bounty.max", 100000000);
 
         if (amount < min) {
-            player.sendMessage(MessageUtil.get("errors.bounty-too-low", Map.of("min", String.valueOf(min))));
+            player.sendMessage(MessageUtil.get("errors.bounty-too-low", Map.of("min", String.format("%.2f", min))));
             return true;
         }
 
         if (amount > max) {
-            player.sendMessage(MessageUtil.get("errors.bounty-too-high", Map.of("max", String.valueOf(max))));
+            player.sendMessage(MessageUtil.get("errors.bounty-too-high", Map.of("max", String.format("%.2f", max))));
             return true;
         }
 
@@ -75,8 +83,8 @@ public class BountyCommand implements CommandExecutor {
         bountyManager.setBounty(target.getUniqueId(),
                 bountyManager.getBounty(target.getUniqueId()) + amount);
 
-        player.sendMessage(MessageUtil.get("bounty-placed", Map.of("amount", String.valueOf(amount), "player", target.getName())));
-        Bukkit.broadcast(MessageUtil.get("global.bounty-placed", Map.of("amount", String.valueOf(amount), "player", target.getName()))
+        player.sendMessage(MessageUtil.get("bounty-placed", Map.of("amount", String.format("%.2f", amount), "player", target.getName())));
+        Bukkit.broadcast(MessageUtil.get("global.bounty-placed", Map.of("amount", String.format("%.2f", amount), "player", target.getName()))
         );
         return true;
     }
