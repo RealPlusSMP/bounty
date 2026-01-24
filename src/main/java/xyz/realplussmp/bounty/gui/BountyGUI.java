@@ -150,76 +150,44 @@ public class BountyGUI {
     private void addStaticItems(Player player, Inventory inv, int page, int totalEntries) {
         int maxPage = (int) Math.ceil(totalEntries / (double) PAGE_SIZE) - 1;
 
-        // Info item
-        String matName = config.getString("gui.info-item.item");
-        if (matName == null) return;
-        Material infoMat;
-        try {
-            infoMat = Material.valueOf(matName.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            return;
-        }
-        int infoSlot = config.getInt("gui.info-item.slot");
-        ItemStack info = new ItemStack(infoMat);
-        ItemMeta infoMeta = info.getItemMeta();
-        infoMeta.displayName(MessageUtil.get("gui.info-item.item-name"));
-        infoMeta.lore(MessageUtil.getList("gui.info-item.lore"));
-        info.setItemMeta(infoMeta);
-        inv.setItem(infoSlot, info);
+        addItem(inv, "gui.info-item");
+        addItem(inv, "gui.search-item");
 
-        // Search item
-        String searchMatName = config.getString("gui.search-item.item");
-        if (searchMatName == null) return;
-        Material searchMaterial;
-        try {
-            searchMaterial = Material.valueOf(searchMatName.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            return;
-        }
-        int searchSlot = config.getInt("gui.search-item.slot");
-        ItemStack search = new ItemStack(searchMaterial);
-        ItemMeta searchMeta = search.getItemMeta();
-        searchMeta.displayName(MessageUtil.get("gui.search-item.item-name"));
-        searchMeta.lore(MessageUtil.getList("gui.search-item.lore"));
-        search.setItemMeta(searchMeta);
-        inv.setItem(searchSlot, search);
-
-        // Next page
         if (page < maxPage) {
-            Material nextMat = Material.valueOf(config.getString("gui.next-page-item.item"));
-            int nextSlot = config.getInt("gui.next-page-item.slot");
-
-            ItemStack next = new ItemStack(nextMat);
-            ItemMeta meta = next.getItemMeta();
-            meta.displayName(MessageUtil.get("gui.next-page-item.item-name"));
-            meta.lore(MessageUtil.getList("gui.next-page-item.lore",
-                    Map.of("currentpage", String.valueOf(page + 1))));
-            next.setItemMeta(meta);
-            inv.setItem(nextSlot, next);
+            addItem(inv, "gui.next-page-item", Map.of("currentpage", String.valueOf(page + 1)));
         }
 
-        // Back page
         if (page > 0) {
-            Material backMat = Material.valueOf(config.getString("gui.back-item.item"));
-            int backSlot = config.getInt("gui.back-item.slot");
-
-            ItemStack back = new ItemStack(backMat);
-            ItemMeta meta = back.getItemMeta();
-            meta.displayName(MessageUtil.get("gui.back-item.item-name"));
-            meta.lore(MessageUtil.getList("gui.back-item.lore"));
-            back.setItemMeta(meta);
-            inv.setItem(backSlot, back);
+            addItem(inv, "gui.back-item");
         }
 
-        // Sort item
-        Material sortMat = Material.valueOf(config.getString("gui.sort-item.item"));
-        int sortSlot = config.getInt("gui.sort-item.slot");
-        ItemStack sort = new ItemStack(sortMat);
-        ItemMeta sortMeta = sort.getItemMeta();
-        sortMeta.displayName(MessageUtil.get("gui.sort-item.item-name"));
         BountySortType sortType = playerSort.getOrDefault(player.getUniqueId(), BountySortType.AMOUNT);
-        sortMeta.lore(MessageUtil.getList("gui.sort-item.lore", Map.of("sorting", sortType.getDisplay())));
-        sort.setItemMeta(sortMeta);
-        inv.setItem(sortSlot, sort);
+        addItem(inv, "gui.sort-item", Map.of("sorting", sortType.getDisplay()));
+    }
+
+    private void addItem(Inventory inv, String path, Map<String, String> placeholders) {
+        String matName = config.getString(path + ".item");
+        if (matName == null) return;
+
+        Material mat;
+        try {
+            mat = Material.valueOf(matName.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return;
+        }
+
+        int slot = config.getInt(path + ".slot");
+        ItemStack item = new ItemStack(mat);
+        ItemMeta meta = item.getItemMeta();
+
+        meta.displayName(MessageUtil.get(path + ".item-name", placeholders));
+        meta.lore(MessageUtil.getList(path + ".lore", placeholders));
+
+        item.setItemMeta(meta);
+        inv.setItem(slot, item);
+    }
+
+    private void addItem(Inventory inv, String path) {
+        addItem(inv, path, Map.of());
     }
 }
