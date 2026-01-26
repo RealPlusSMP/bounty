@@ -30,7 +30,7 @@ public final class Bounty extends JavaPlugin {
         // Plugin startup logic
         instance = this;
         saveDefaultConfig();
-        saveResource("messages.yml", true);
+        saveResource("messages.yml", false);
         reloadMessages();
         MessageUtil.init(getMessages());
 

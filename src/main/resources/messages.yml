@@ -1,9 +1,9 @@
-bounty-placed: "<green>You placed a bounty of <yellow>$%amount%</yellow> on <aqua>%player%</aqua></green>"
-claimed: "<gold>You claimed <yellow>$%amount%</yellow> bounty!</gold>"
+bounty-placed: "<white>You placed a bounty of <yellow>$%amount%</yellow> on <aqua>%player%</aqua></white>"
+claimed: "<white>You claimed <yellow>$%amount%</yellow> bounty!</white>"
 
 global:
-  bounty-placed: "<green>A bounty of <yellow>$%amount%</yellow> has been put on <aqua>%player%</aqua>."
-  claimed-global: "<gold>%player% <green>has claimed a bounty of <yellow>$%amount%</yellow>."
+  bounty-placed: "<white>A bounty of <yellow>$%amount%</yellow> has been put on <aqua>%player%</aqua>."
+  claimed-global: "<gold>%player% <white>has claimed a bounty of <yellow>$%amount%</yellow>."
 
 errors:
   self-bounty: "<red>You can't place a bounty on yourself!</red>"
