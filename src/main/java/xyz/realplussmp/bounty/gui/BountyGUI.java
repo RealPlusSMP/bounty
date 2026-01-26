@@ -13,6 +13,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import xyz.realplussmp.bounty.bounty.BountyManager;
 import xyz.realplussmp.bounty.bounty.BountySortType;
 import xyz.realplussmp.bounty.util.MessageUtil;
+import xyz.realplussmp.bounty.util.NumberUtil;
 
 import java.util.*;
 
@@ -85,7 +86,7 @@ public class BountyGUI {
         meta.displayName(MessageUtil.get("gui.player-head.item-name",
                 Map.of("player", playerName)));
         meta.lore(MessageUtil.getList("gui.player-head.lore",
-                Map.of("amount", String.format("%.2f", amount))));
+                Map.of("amount", NumberUtil.format(amount))));
 
         head.setItemMeta(meta);
         return head;

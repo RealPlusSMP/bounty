@@ -8,6 +8,7 @@ import xyz.realplussmp.bounty.bounty.BountyManager;
 import xyz.realplussmp.bounty.gui.BountyGUI;
 import xyz.realplussmp.bounty.util.ConfigUtil;
 import xyz.realplussmp.bounty.util.MessageUtil;
+import xyz.realplussmp.bounty.util.NumberUtil;
 
 import java.util.Map;
 
@@ -64,12 +65,12 @@ public class BountyCommand implements CommandExecutor {
         double max = configUtil.getDouble("bounty.max", 100000000);
 
         if (amount < min) {
-            player.sendMessage(MessageUtil.get("errors.bounty-too-low", Map.of("min", String.format("%.2f", min))));
+            player.sendMessage(MessageUtil.get("errors.bounty-too-low", Map.of("min", NumberUtil.format(min))));
             return true;
         }
 
         if (amount > max) {
-            player.sendMessage(MessageUtil.get("errors.bounty-too-high", Map.of("max", String.format("%.2f", max))));
+            player.sendMessage(MessageUtil.get("errors.bounty-too-high", Map.of("max", NumberUtil.format(max))));
             return true;
         }
 
@@ -88,8 +89,8 @@ public class BountyCommand implements CommandExecutor {
         bountyManager.setBounty(target.getUniqueId(),
                 bountyManager.getBounty(target.getUniqueId()) + amount);
 
-        player.sendMessage(MessageUtil.get("bounty-placed", Map.of("amount", String.format("%.2f", amount), "player", target.getName())));
-        Bukkit.broadcast(MessageUtil.get("global.bounty-placed", Map.of("amount", String.format("%.2f", amount), "player", target.getName()))
+        player.sendMessage(MessageUtil.get("bounty-placed", Map.of("amount", NumberUtil.format(amount), "player", target.getName())));
+        Bukkit.broadcast(MessageUtil.get("global.bounty-placed", Map.of("amount", NumberUtil.format(amount), "player", target.getName()))
         );
         return true;
     }
